@@ -1,45 +1,65 @@
 "use client";
 
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { GitHubIcon, LinkedInIcon } from "./icons";
 import { usePathname, useRouter } from "next/navigation";
 import { motion } from "motion/react";
 
 const Header = () => {
+  const headerRef = useRef<HTMLElement | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleClick = () => {
-    setIsOpen(!isOpen);
-  };
+  const handleClick = () => setIsOpen((prev) => !prev);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 60);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-8 font-medium flex items-center justify-between relative z-10">
-      {/* Hamburger */}
-      <Hamburger handleClick={handleClick} isOpen={isOpen} />
+    <header
+      ref={headerRef}
+      className={`w-full fixed top-0 z-50 transition-colors duration-300 ${
+        isScrolled ? "bg-white text-black shadow-md" : "bg-transparent text-white"
+      }`}
+    >
+      <div className="mx-auto max-w-6xl w-full px-4 sm:px-6 lg:px-8 py-6 font-medium flex items-center justify-between gap-4">
+        {/* Hamburger */}
+        <Hamburger handleClick={handleClick} isOpen={isOpen} />
 
-      <div className="w-full flex items-center justify-between gap-4">
-        <nav>
-          <CustomLink href={"/"} title="Home" className="mr-4" />
-          <CustomLink href={"/about"} title="About" className="mx-4" />
-          <CustomLink href={"/experience"} title="Experience" className="mx-4" />
-          <CustomLink href={"/education"} title="Education" className="ml-4" />
+        <nav className="hidden md:flex md:items-center md:justify-center md:gap-4">
+          <CustomLink href={"/"} title="Home" isScrolled={isScrolled} />
+          <CustomLink href={"/about"} title="About" isScrolled={isScrolled} />
+          <CustomLink href={"/experience"} title="Experience" isScrolled={isScrolled} />
+          <CustomLink href={"/education"} title="Education" isScrolled={isScrolled} />
         </nav>
+
         <nav className="flex items-center justify-center flex-wrap">
           <motion.a
             href="https://github.com/yungtyyler"
-            target={"_blank"}
+            target="_blank"
             whileHover={{ y: -2 }}
-            className="w-6 mx-3"
+            className={`w-6 mx-3 transition-colors duration-300 ${
+              isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-gray-300"
+            }`}
             whileTap={{ scale: 0.9 }}
           >
             <GitHubIcon />
           </motion.a>
+
           <motion.a
             href="https://www.linkedin.com/in/tyler-varzeas/"
-            target={"_blank"}
+            target="_blank"
             whileHover={{ y: -2 }}
-            className="w-6 mx-3"
+            className={`w-6 mx-3 transition-colors duration-300 ${
+              isScrolled ? "text-black hover:text-gray-700" : "text-white hover:text-gray-300"
+            }`}
             whileTap={{ scale: 0.9 }}
           >
             <LinkedInIcon />
@@ -58,7 +78,10 @@ type HamburgerProps = {
 
 const Hamburger = ({ handleClick, isOpen }: HamburgerProps) => {
   return (
-    <button onClick={handleClick} className="flex-col justify-center items-center hidden lg:flex">
+    <button
+      onClick={handleClick}
+      className="flex-col justify-center items-center flex md:hidden cursor-pointer"
+    >
       <span
         className={`bg-white transition-all duration-300 ease-out block h-0.5 w-6 rounded-sm ${
           isOpen ? "rotate-45 translate-y-1" : "-translate-y-0.5"
@@ -85,7 +108,7 @@ type MobileMenuProps = {
 const MobileMenu = ({ handleClick }: MobileMenuProps) => {
   return (
     <motion.div
-      className="min-w-[70vw] z-30 flex flex-col justify-between items-center fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/90 text-black rounded-lg backdrop-blur-md py-32"
+      className="md:hidden min-w-[70vw] z-30 flex flex-col justify-between items-center fixed top-1/2 left-1/2 bg-white/80 text-black rounded-lg backdrop-blur-md py-32"
       initial={{ scale: 0, opacity: 0, x: "-50%", y: "-50%" }}
       animate={{ scale: 1, opacity: 1 }}
     >
@@ -136,18 +159,26 @@ const MobileMenu = ({ handleClick }: MobileMenuProps) => {
 type LinkProps = {
   href: string;
   title: string;
+  isScrolled: boolean;
   className?: string;
 };
 
-const CustomLink = ({ href, title, className = "" }: LinkProps) => {
+const CustomLink = ({ href, title, isScrolled, className = "" }: LinkProps) => {
+  const pathname = usePathname();
+
   return (
-    <Link href={href} className={`${className} relative group`}>
+    <Link
+      href={href}
+      className={`${className} relative group transition-colors duration-300 ${
+        isScrolled ? "text-black" : "text-white"
+      }`}
+    >
       {title}
 
       <span
-        className={`h-[1px] inline-block bg-white absolute left-0 -bottom-0.5 group-hover:w-full transition-[width] ease duration-300 ${
-          usePathname() === href ? "w-full" : "w-0"
-        }`}
+        className={`h-[1px] inline-block absolute left-0 -bottom-0.5 group-hover:w-full transition-[width] ease duration-300 ${
+          isScrolled ? "bg-black" : "bg-white"
+        } ${pathname === href ? "w-full" : "w-0"}`}
       >
         &nbsp;
       </span>

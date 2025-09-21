@@ -63,11 +63,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
       <body
-        className={`${montserrat.className} font-medium antialiased flex flex-col min-h-screen`}
+        className={`${montserrat.className} font-medium antialiased flex flex-col min-h-screen relative`}
         suppressHydrationWarning
       >
         <Header />
@@ -83,4 +83,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;
